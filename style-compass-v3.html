@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Style Compass v3.2</title>
+<title>Style Compass v3.3</title>
 <style>
 :root {
   --bg: #f5f5f7;
@@ -598,6 +598,148 @@ body {
 }
 .welcome-banner h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
 .welcome-banner p { font-size: 13px; opacity: 0.85; }
+
+/* Outfit of the Day */
+.ootd-card {
+  background: linear-gradient(135deg, #ff9500, #ff3b30);
+  border-radius: var(--radius); padding: 16px;
+  color: #fff; margin-bottom: 16px;
+  position: relative; overflow: hidden;
+  cursor: pointer; transition: transform 0.2s;
+}
+.ootd-card:active { transform: scale(0.98); }
+.ootd-card .ootd-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; opacity: 0.8; margin-bottom: 6px;
+}
+.ootd-card .ootd-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.ootd-card .ootd-meta { font-size: 12px; opacity: 0.85; }
+.ootd-card .ootd-items {
+  display: flex; gap: 6px; margin-top: 10px;
+}
+.ootd-card .ootd-item {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.ootd-card .ootd-score {
+  position: absolute; top: 14px; right: 14px;
+  background: rgba(255,255,255,0.25); padding: 4px 10px;
+  border-radius: 10px; font-size: 13px; font-weight: 700;
+}
+
+/* Mood Tracker */
+.mood-picker {
+  display: flex; gap: 8px; justify-content: center;
+  margin: 12px 0;
+}
+.mood-btn {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--bg); border: 2px solid var(--border);
+  font-size: 24px; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.mood-btn:hover, .mood-btn.selected { border-color: var(--accent); transform: scale(1.15); }
+.mood-history {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px;
+}
+.mood-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--bg); display: flex; align-items: center;
+  justify-content: center; font-size: 14px;
+  border: 1px solid var(--border);
+}
+
+/* Color Palette */
+.color-palette {
+  display: flex; gap: 4px; margin: 12px 0; border-radius: 10px; overflow: hidden;
+}
+.color-swatch {
+  flex: 1; height: 40px; position: relative;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 2px;
+}
+.color-swatch span {
+  font-size: 8px; font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  color: #fff;
+}
+.harmony-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--bg); padding: 4px 10px; border-radius: 8px;
+  font-size: 11px; font-weight: 600; color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+/* Achievements */
+.achievements-section {
+  background: var(--bg-card); border-radius: var(--radius);
+  padding: 16px; box-shadow: var(--shadow);
+  border: 1px solid var(--border); margin-bottom: 16px;
+}
+.achievements-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+.achievements-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+}
+.achievement-card {
+  text-align: center; padding: 12px 6px;
+  border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg); transition: all 0.3s;
+}
+.achievement-card.unlocked {
+  border-color: var(--warning); background: linear-gradient(135deg, rgba(255,149,0,0.08), rgba(255,59,48,0.05));
+}
+.achievement-card.locked { opacity: 0.45; }
+.achievement-card .ach-icon { font-size: 28px; margin-bottom: 4px; }
+.achievement-card .ach-name { font-size: 10px; font-weight: 600; line-height: 1.2; }
+.achievement-card .ach-desc { font-size: 8px; color: var(--text-secondary); margin-top: 2px; }
+.achievement-progress {
+  height: 3px; background: var(--border); border-radius: 2px;
+  margin-top: 6px; overflow: hidden;
+}
+.achievement-progress-fill {
+  height: 100%; background: var(--warning); border-radius: 2px;
+  transition: width 0.3s;
+}
+
+/* Style Tips */
+.tip-card {
+  background: var(--bg-card); border-radius: var(--radius);
+  padding: 14px 16px; margin-bottom: 16px;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.tip-card .tip-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--accent-light); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.tip-card .tip-text { font-size: 13px; line-height: 1.4; color: var(--text); }
+.tip-card .tip-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--accent); margin-bottom: 2px;
+}
+
+/* Star rating */
+.star-rating { display: flex; gap: 4px; justify-content: center; margin: 8px 0; }
+.star-btn {
+  background: none; border: none; font-size: 28px;
+  cursor: pointer; transition: transform 0.15s;
+  color: var(--border); line-height: 1;
+}
+.star-btn:hover { transform: scale(1.2); }
+.star-btn.active { color: #FFD700; }
+.star-btn.active:hover { transform: scale(1.25); }
+.rating-label {
+  text-align: center; font-size: 12px;
+  color: var(--text-secondary); margin-bottom: 8px;
+}
+
+/* Mini stars for history */
+.mini-stars { display: flex; gap: 1px; margin-top: 2px; }
+.mini-stars span { font-size: 10px; color: #FFD700; }
 </style>
 </head>
 <body>
@@ -620,8 +762,22 @@ body {
   <!-- HOME -->
   <div class="tab-content active" id="tabHome">
     <div class="welcome-banner" id="welcomeBanner">
-      <h2 id="welcomeGreeting">Welcome back!</h2>
+      <h2 id="welcomeGreeting">Welcome!</h2>
       <p id="welcomeSubtext">Let's pick your outfit for today</p>
+    </div>
+    <div class="ootd-card" id="ootdCard" onclick="App.openOOTD()" style="display:none">
+      <div class="ootd-label">Outfit of the Day</div>
+      <div class="ootd-name" id="ootdName"></div>
+      <div class="ootd-meta" id="ootdMeta"></div>
+      <div class="ootd-items" id="ootdItems"></div>
+      <div class="ootd-score" id="ootdScore"></div>
+    </div>
+    <div class="tip-card" id="tipCard">
+      <div class="tip-icon" id="tipIcon">💡</div>
+      <div>
+        <div class="tip-label">Daily Style Tip</div>
+        <div class="tip-text" id="tipText">Loading tip...</div>
+      </div>
     </div>
     <div class="weather-detail" id="weatherDetail">
       <div class="temp-large" id="weatherTempLarge">--</div>
@@ -708,6 +864,13 @@ body {
   <!-- HISTORY -->
   <div class="tab-content" id="tabHistory">
     <div class="stats-bar" id="statsBar"></div>
+    <div class="achievements-section">
+      <h3>🏆 Achievements</h3>
+      <div class="achievements-grid" id="achievementsGrid"></div>
+    </div>
+    <div class="section-heading">Mood Journal</div>
+    <div class="mood-history" id="moodHistory"></div>
+    <div style="margin-bottom:16px"></div>
     <div class="style-dna-section">
       <h3>🧬 Style DNA Radar</h3>
       <div class="radar-container"><canvas id="radarCanvas" width="300" height="300"></canvas></div>
@@ -723,9 +886,9 @@ body {
   <!-- SETTINGS -->
   <div class="tab-content" id="tabSettings">
     <div class="profile-card" id="profileCard">
-      <div class="profile-avatar" id="profileAvatar">E</div>
+      <div class="profile-avatar" id="profileAvatar">S</div>
       <div class="profile-info">
-        <h3 id="profileName">Eiasash</h3>
+        <h3 id="profileName">Stylist</h3>
         <p id="profileBio">Style Compass member</p>
       </div>
     </div>
@@ -733,7 +896,7 @@ body {
       <div class="settings-group-title">Profile</div>
       <div class="setting-row">
         <span class="setting-label">👤 Name</span>
-        <input type="text" class="setting-input" id="profileNameInput" placeholder="Your name" value="Eiasash" oninput="App.saveProfile()" maxlength="30">
+        <input type="text" class="setting-input" id="profileNameInput" placeholder="Your name" value="" oninput="App.saveProfile()" maxlength="30">
       </div>
       <div class="setting-row">
         <span class="setting-label">📝 Bio</span>
@@ -782,7 +945,7 @@ body {
     </div>
     <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="App.importData(event)">
     <div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:12px">
-      Style Compass v3.2 &middot; Auto-save enabled
+      Style Compass v3.3 &middot; Auto-save enabled
     </div>
   </div>
 </div>
@@ -811,7 +974,25 @@ body {
     <h2 id="modalTitle">Outfit</h2>
     <div class="modal-items-grid" id="modalItems"></div>
     <div class="outfit-tags" id="modalTags"></div>
+    <div id="colorPaletteContainer"></div>
     <div class="modal-actions">
+      <div style="text-align:center;margin-bottom:4px">
+        <div class="rating-label">How do you feel about this outfit?</div>
+        <div class="mood-picker" id="modalMoodPicker">
+          <button class="mood-btn" data-mood="fire" onclick="App.selectMood('fire',this)">🔥</button>
+          <button class="mood-btn" data-mood="heart" onclick="App.selectMood('heart',this)">😍</button>
+          <button class="mood-btn" data-mood="cool" onclick="App.selectMood('cool',this)">😎</button>
+          <button class="mood-btn" data-mood="think" onclick="App.selectMood('think',this)">🤔</button>
+          <button class="mood-btn" data-mood="meh" onclick="App.selectMood('meh',this)">😐</button>
+        </div>
+        <div class="star-rating" id="modalStarRating">
+          <button class="star-btn" onclick="App.setRating(1)">★</button>
+          <button class="star-btn" onclick="App.setRating(2)">★</button>
+          <button class="star-btn" onclick="App.setRating(3)">★</button>
+          <button class="star-btn" onclick="App.setRating(4)">★</button>
+          <button class="star-btn" onclick="App.setRating(5)">★</button>
+        </div>
+      </div>
       <button class="modal-btn primary" onclick="App.selectOutfit()">✅ Wear This Today</button>
       <button class="modal-btn" onclick="App.showComposite()">📸 Outfit Composite</button>
       <button class="modal-btn" onclick="App.showAICritique()">🤖 AI Critique</button>
@@ -1118,6 +1299,8 @@ const App = {
   _weatherFetching: false,
   _critiqueFetching: false,
   _searchDebounce: null,
+  _selectedMood: null,
+  _selectedRating: 0,
 
   // ---- INIT ----
   async init() {
@@ -1167,11 +1350,15 @@ const App = {
     this.setupKeyboard();
     this.setupOfflineDetection();
     this.setupBeforeUnload();
+    this.showOOTD();
+    this.showDailyTip();
+    this.renderAchievements();
+    this.renderMoodHistory();
   },
 
   // ---- PROFILE ----
   loadProfile() {
-    const name = localStorage.getItem('profileName') || 'Eiasash';
+    const name = localStorage.getItem('profileName') || 'Stylist';
     const bio = localStorage.getItem('profileBio') || 'Style Compass member';
     document.getElementById('profileNameInput').value = name;
     document.getElementById('profileBioInput').value = bio;
@@ -1242,7 +1429,7 @@ const App = {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     btn.classList.add('active');
-    if (tabId === 'tabHistory') { this.renderHistory(); this.renderStats(); }
+    if (tabId === 'tabHistory') { this.renderHistory(); this.renderStats(); this.renderAchievements(); this.renderMoodHistory(); }
     if (tabId === 'tabFavorites') this.renderFavorites();
     if (tabId === 'tabWardrobe') this.renderWardrobe();
   },
@@ -1443,6 +1630,11 @@ const App = {
     document.getElementById('compositeContainer').innerHTML = '';
     const isFav = this.isFavorite(outfit.name, this.currentVibe);
     document.getElementById('modalFavBtn').textContent = isFav ? '⭐ Remove from Favorites' : '☆ Add to Favorites';
+    this._selectedMood = null;
+    this._selectedRating = 0;
+    document.querySelectorAll('#modalMoodPicker .mood-btn').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('#modalStarRating .star-btn').forEach(b => b.classList.remove('active'));
+    this.showColorPalette(outfit);
     document.getElementById('outfitModal').classList.add('active');
   },
 
@@ -1463,7 +1655,9 @@ const App = {
       score: outfit.score,
       items: outfit.items.map(i => i.name),
       date: new Date().toISOString(),
-      tags: outfit.tags
+      tags: outfit.tags,
+      mood: this._selectedMood || null,
+      rating: this._selectedRating || 0
     };
     this.outfitHistory.unshift(entry);
     if (this.outfitHistory.length > 100) this.outfitHistory.pop();
@@ -1474,7 +1668,11 @@ const App = {
     // Store last action for undo
     this.lastAction = { type: 'select', entry };
     document.getElementById('outfitModal').classList.remove('active');
-    this.showToastWithUndo(`"${outfit.name}" selected!`, () => this.undoLastAction());
+    this.renderAchievements();
+    this.renderMoodHistory();
+    const moodStr = this._selectedMood ? ` ${this.getMoodEmoji(this._selectedMood)}` : '';
+    const ratingStr = this._selectedRating ? ` ${'★'.repeat(this._selectedRating)}` : '';
+    this.showToastWithUndo(`"${outfit.name}" selected!${moodStr}${ratingStr}`, () => this.undoLastAction());
   },
 
   undoLastAction() {
@@ -2062,7 +2260,7 @@ Return this exact JSON structure:
     ctx.fillText(`${outfit.score}%`, S - 35, S - 35);
     ctx.fillStyle = dk ? '#3a3a3c' : '#d2d2d7';
     ctx.font = '10px -apple-system, sans-serif'; ctx.textAlign = 'left';
-    ctx.fillText('Style Compass v3.2', 12, S - 12);
+    ctx.fillText('Style Compass v3.3', 12, S - 12);
 
     container.innerHTML = '';
     container.appendChild(canvas);
@@ -2220,11 +2418,14 @@ Return this exact JSON structure:
       const dateStr = isValid ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '???';
       const timeStr = isValid ? date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
       const vibeEmoji = { casual:'☀️', formal:'👔', date:'💝', sporty:'🏃', creative:'🎨' }[entry.vibe] || '👔';
+      const moodEmoji = entry.mood ? App.getMoodEmoji(entry.mood) : '';
+      const starsHtml = entry.rating ? `<div class="mini-stars">${'<span>★</span>'.repeat(entry.rating)}${'<span style="color:var(--border)">★</span>'.repeat(5 - entry.rating)}</div>` : '';
       return `
         <div class="history-item">
           <div class="history-item-info">
-            <h4>${vibeEmoji} ${esc(entry.name || 'Unknown')}</h4>
+            <h4>${vibeEmoji} ${esc(entry.name || 'Unknown')} ${moodEmoji}</h4>
             <p>${(entry.items || []).map(n => esc(String(n))).join(' · ')}</p>
+            ${starsHtml}
           </div>
           <div class="history-item-meta">
             <div class="score">${entry.score || 0}%</div>
@@ -2381,7 +2582,7 @@ Return this exact JSON structure:
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
     localStorage.setItem('darkMode', isDark);
     this.triggerHaptic('light');
-    if (document.getElementById('tabHistory').classList.contains('active')) this.showStyleDNA();
+    if (document.getElementById('tabHistory').classList.contains('active')) { this.showStyleDNA(); this.renderAchievements(); }
   },
 
   // ---- SETTINGS ----
@@ -2526,6 +2727,231 @@ Return this exact JSON structure:
         this.showToast('Copied to clipboard!');
       } catch (e) { this.showToast('Could not share'); }
     }
+  },
+
+  // ---- OUTFIT OF THE DAY ----
+  showOOTD() {
+    const allOutfits = [];
+    Object.entries(OUTFIT_DATABASE).forEach(([vibe, outfits]) => {
+      outfits.forEach(o => allOutfits.push({ ...o, vibe }));
+    });
+    if (allOutfits.length === 0) return;
+    // Seed random by day so it's consistent for the entire day
+    const today = new Date();
+    const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+    const idx = seed % allOutfits.length;
+    this._ootd = allOutfits[idx];
+    const card = document.getElementById('ootdCard');
+    card.style.display = 'block';
+    document.getElementById('ootdName').textContent = this._ootd.name;
+    const vibeLabel = this._ootd.vibe.charAt(0).toUpperCase() + this._ootd.vibe.slice(1);
+    document.getElementById('ootdMeta').textContent = `${vibeLabel} vibe · Curated for today`;
+    document.getElementById('ootdScore').textContent = `${this._ootd.score}%`;
+    document.getElementById('ootdItems').innerHTML = this._ootd.items.map(i =>
+      `<div class="ootd-item">${esc(i.emoji)}</div>`
+    ).join('');
+  },
+
+  openOOTD() {
+    if (!this._ootd) return;
+    // Find and select the vibe, then open the outfit
+    const vibeChip = document.querySelector(`.vibe-chip[data-vibe="${this._ootd.vibe}"]`);
+    if (vibeChip && this.currentVibe !== this._ootd.vibe) {
+      this.selectVibe(this._ootd.vibe, vibeChip);
+    }
+    const idx = this.currentOutfits.findIndex(o => o.name === this._ootd.name);
+    if (idx >= 0) this.openOutfitDetail(idx);
+    else {
+      // Add it temporarily
+      this.currentOutfits.unshift(this._ootd);
+      this.renderOutfitGrid();
+      this.openOutfitDetail(0);
+    }
+  },
+
+  // ---- DAILY STYLE TIPS ----
+  showDailyTip() {
+    const tips = [
+      { icon: '👔', text: 'The fit is everything. A well-fitted $20 shirt looks better than a baggy $200 one.' },
+      { icon: '🎨', text: 'Stick to a 3-color rule: one base, one neutral, one accent.' },
+      { icon: '👟', text: 'Shoes make or break an outfit. Keep them clean and in good condition.' },
+      { icon: '🧥', text: 'Layering adds depth. Try a light jacket over a simple tee for instant style.' },
+      { icon: '⌚', text: 'One good accessory can elevate a basic outfit from 6 to 9.' },
+      { icon: '🪞', text: 'When in doubt, monochrome is always chic. Different shades of the same color work wonders.' },
+      { icon: '📐', text: 'Balance proportions: if the top is loose, keep the bottom slim, and vice versa.' },
+      { icon: '🧵', text: 'Invest in quality basics: white tee, dark jeans, neutral sneakers. They go with everything.' },
+      { icon: '🌡️', text: 'Check the weather before dressing. Being comfortable is the foundation of good style.' },
+      { icon: '💎', text: 'Don\'t underestimate the power of a belt. It defines your silhouette.' },
+      { icon: '🎭', text: 'Dress for the occasion first, then add your personal flair.' },
+      { icon: '🧹', text: 'Declutter your wardrobe seasonally. If you haven\'t worn it in a year, let it go.' },
+      { icon: '🪡', text: 'Know your tailor. Simple alterations can transform off-the-rack clothes.' },
+      { icon: '🌈', text: 'Complementary colors (opposite on the color wheel) create striking combinations.' },
+      { icon: '📸', text: 'Take outfit photos to track what works. Your Style Compass history is your lookbook.' },
+      { icon: '🧴', text: 'Grooming completes the look. Clean nails, tamed hair, fresh scent.' },
+      { icon: '🔄', text: 'Capsule wardrobes work: 30 versatile pieces can create 100+ outfits.' },
+      { icon: '🎯', text: 'Find your signature piece. Something people associate with your style.' },
+      { icon: '🌙', text: 'Dark colors are slimming and forgiving. Perfect for night events.' },
+      { icon: '☀️', text: 'Light fabrics and colors in summer keep you cool and looking fresh.' },
+      { icon: '🧦', text: 'Fun socks are an underrated style move. They\'re a subtle personality hint.' }
+    ];
+    const today = new Date();
+    const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+    const tip = tips[dayOfYear % tips.length];
+    document.getElementById('tipIcon').textContent = tip.icon;
+    document.getElementById('tipText').textContent = tip.text;
+  },
+
+  // ---- MOOD TRACKER ----
+  getMoodEmoji(mood) {
+    const moods = { fire: '🔥', heart: '😍', cool: '😎', think: '🤔', meh: '😐' };
+    return moods[mood] || '';
+  },
+
+  selectMood(mood, btn) {
+    this._selectedMood = mood;
+    document.querySelectorAll('#modalMoodPicker .mood-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    this.triggerHaptic('light');
+  },
+
+  renderMoodHistory() {
+    const container = document.getElementById('moodHistory');
+    const recent = this.outfitHistory.filter(e => e.mood).slice(0, 30);
+    if (recent.length === 0) {
+      container.innerHTML = '<div style="font-size:12px;color:var(--text-secondary);padding:8px">No mood data yet. Select a mood when choosing outfits!</div>';
+      return;
+    }
+    container.innerHTML = recent.map(e => {
+      const d = new Date(e.date);
+      const dayStr = !isNaN(d.getTime()) ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '?';
+      return `<div class="mood-dot" title="${esc(e.name)} - ${dayStr}">${this.getMoodEmoji(e.mood)}</div>`;
+    }).join('');
+  },
+
+  // ---- STAR RATING ----
+  setRating(stars) {
+    this._selectedRating = stars;
+    const btns = document.querySelectorAll('#modalStarRating .star-btn');
+    btns.forEach((btn, i) => btn.classList.toggle('active', i < stars));
+    this.triggerHaptic('light');
+  },
+
+  // ---- COLOR PALETTE ----
+  showColorPalette(outfit) {
+    const container = document.getElementById('colorPaletteContainer');
+    if (!outfit || !outfit.items || outfit.items.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+    const colors = outfit.items.map(i => ({ color: i.color, name: i.type }));
+    const harmony = this.analyzeColorHarmony(colors.map(c => c.color));
+    container.innerHTML = `
+      <div style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:12px;font-weight:600;color:var(--text-secondary)">Color Palette</span>
+          <span class="harmony-badge">${harmony.icon} ${esc(harmony.label)}</span>
+        </div>
+        <div class="color-palette">
+          ${colors.map(c => `<div class="color-swatch" style="background:${esc(c.color)}"><span>${esc(c.name)}</span></div>`).join('')}
+        </div>
+      </div>
+    `;
+  },
+
+  analyzeColorHarmony(hexColors) {
+    if (hexColors.length <= 1) return { label: 'Single tone', icon: '🎯' };
+    const hsls = hexColors.map(h => this.hexToHsl(h)).filter(h => h);
+    if (hsls.length < 2) return { label: 'Neutral', icon: '⚪' };
+    // Check saturation - if most are low, it's neutral
+    const avgSat = hsls.reduce((s, h) => s + h[1], 0) / hsls.length;
+    if (avgSat < 15) return { label: 'Neutral palette', icon: '⚪' };
+    // Check hue differences
+    const hues = hsls.filter(h => h[1] > 10).map(h => h[0]);
+    if (hues.length < 2) return { label: 'Monochrome', icon: '🌑' };
+    const maxDiff = this.maxHueDiff(hues);
+    if (maxDiff < 30) return { label: 'Analogous', icon: '🌊' };
+    if (maxDiff > 150 && maxDiff < 210) return { label: 'Complementary', icon: '🔥' };
+    if (maxDiff >= 90 && maxDiff <= 150) return { label: 'Triadic', icon: '🔺' };
+    return { label: 'Eclectic', icon: '🎨' };
+  },
+
+  hexToHsl(hex) {
+    try {
+      if (!hex || hex.length < 7) return null;
+      let r = parseInt(hex.slice(1,3),16)/255;
+      let g = parseInt(hex.slice(3,5),16)/255;
+      let b = parseInt(hex.slice(5,7),16)/255;
+      if (isNaN(r) || isNaN(g) || isNaN(b)) return null;
+      const max = Math.max(r,g,b), min = Math.min(r,g,b);
+      let h, s, l = (max+min)/2;
+      if (max === min) { h = s = 0; }
+      else {
+        const d = max - min;
+        s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+        switch(max) {
+          case r: h = ((g-b)/d + (g<b?6:0)) * 60; break;
+          case g: h = ((b-r)/d + 2) * 60; break;
+          case b: h = ((r-g)/d + 4) * 60; break;
+        }
+      }
+      return [Math.round(h), Math.round(s*100), Math.round(l*100)];
+    } catch(e) { return null; }
+  },
+
+  maxHueDiff(hues) {
+    let maxD = 0;
+    for (let i = 0; i < hues.length; i++) {
+      for (let j = i+1; j < hues.length; j++) {
+        let d = Math.abs(hues[i] - hues[j]);
+        if (d > 180) d = 360 - d;
+        if (d > maxD) maxD = d;
+      }
+    }
+    return maxD;
+  },
+
+  // ---- ACHIEVEMENTS ----
+  getAchievements() {
+    const total = this.outfitHistory.length;
+    const streak = this.getStreak();
+    const favCount = this.favorites.length;
+    const wardrobeCount = this.wardrobe.length;
+    const vibesUsed = new Set(this.outfitHistory.map(e => e.vibe)).size;
+    const ratings = this.outfitHistory.filter(e => e.rating > 0).length;
+    const moods = this.outfitHistory.filter(e => e.mood).length;
+    return [
+      { id: 'first', icon: '👶', name: 'First Pick', desc: 'Select your first outfit', progress: Math.min(total, 1), target: 1 },
+      { id: 'ten', icon: '🔟', name: 'Tenacious', desc: '10 outfit selections', progress: Math.min(total, 10), target: 10 },
+      { id: 'fifty', icon: '🏅', name: 'Half Century', desc: '50 outfit selections', progress: Math.min(total, 50), target: 50 },
+      { id: 'streak3', icon: '🔥', name: 'On Fire', desc: '3-day streak', progress: Math.min(streak, 3), target: 3 },
+      { id: 'streak7', icon: '💫', name: 'Week Warrior', desc: '7-day streak', progress: Math.min(streak, 7), target: 7 },
+      { id: 'streak30', icon: '👑', name: 'Style King', desc: '30-day streak', progress: Math.min(streak, 30), target: 30 },
+      { id: 'fav5', icon: '⭐', name: 'Collector', desc: '5 favorites saved', progress: Math.min(favCount, 5), target: 5 },
+      { id: 'wardrobe10', icon: '🧥', name: 'Fashionista', desc: '10 wardrobe items', progress: Math.min(wardrobeCount, 10), target: 10 },
+      { id: 'allvibes', icon: '🌈', name: 'Chameleon', desc: 'Try all 5 vibes', progress: Math.min(vibesUsed, 5), target: 5 },
+      { id: 'rate5', icon: '⭐', name: 'Critic', desc: 'Rate 5 outfits', progress: Math.min(ratings, 5), target: 5 },
+      { id: 'mood10', icon: '😎', name: 'Mood Master', desc: 'Log 10 moods', progress: Math.min(moods, 10), target: 10 },
+      { id: 'darkmode', icon: '🌙', name: 'Night Owl', desc: 'Enable dark mode', progress: localStorage.getItem('darkMode') === 'true' ? 1 : 0, target: 1 }
+    ];
+  },
+
+  renderAchievements() {
+    const grid = document.getElementById('achievementsGrid');
+    const achievements = this.getAchievements();
+    const unlocked = achievements.filter(a => a.progress >= a.target).length;
+    grid.parentElement.querySelector('h3').textContent = `🏆 Achievements (${unlocked}/${achievements.length})`;
+    grid.innerHTML = achievements.map(a => {
+      const isUnlocked = a.progress >= a.target;
+      const pct = Math.round((a.progress / a.target) * 100);
+      return `
+        <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
+          <div class="ach-icon">${a.icon}</div>
+          <div class="ach-name">${esc(a.name)}</div>
+          <div class="ach-desc">${esc(a.desc)}</div>
+          ${!isUnlocked ? `<div class="achievement-progress"><div class="achievement-progress-fill" style="width:${pct}%"></div></div>` : ''}
+        </div>
+      `;
+    }).join('');
   },
 
   // ---- TOAST ----
