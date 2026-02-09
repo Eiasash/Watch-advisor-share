@@ -484,6 +484,40 @@ body {
   color: #fff; padding: 4px 10px; border-radius: 12px;
   font-size: 12px; font-weight: 700; margin-left: 8px;
 }
+
+/* Profile section */
+.profile-card {
+  background: var(--bg-card); border-radius: var(--radius);
+  padding: 20px; margin-bottom: 16px;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+  display: flex; align-items: center; gap: 16px;
+}
+.profile-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #9b59b6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: #fff; font-weight: 700;
+  flex-shrink: 0;
+}
+.profile-info h3 { font-size: 16px; font-weight: 700; }
+.profile-info p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.profile-edit-row {
+  display: flex; gap: 8px; margin-top: 8px;
+}
+.profile-edit-row input {
+  flex: 1; padding: 10px 14px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--bg);
+  color: var(--text); font-size: 14px;
+}
+
+/* Welcome banner */
+.welcome-banner {
+  background: linear-gradient(135deg, var(--accent), #5856d6);
+  border-radius: var(--radius); padding: 20px;
+  color: #fff; margin-bottom: 16px;
+}
+.welcome-banner h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.welcome-banner p { font-size: 13px; opacity: 0.85; }
 </style>
 </head>
 <body>
@@ -505,6 +539,10 @@ body {
 <div class="main">
   <!-- HOME -->
   <div class="tab-content active" id="tabHome">
+    <div class="welcome-banner" id="welcomeBanner">
+      <h2 id="welcomeGreeting">Welcome back!</h2>
+      <p id="welcomeSubtext">Let's pick your outfit for today</p>
+    </div>
     <div class="weather-detail" id="weatherDetail">
       <div class="temp-large" id="weatherTempLarge">--</div>
       <div class="weather-info">
@@ -578,6 +616,24 @@ body {
 
   <!-- SETTINGS -->
   <div class="tab-content" id="tabSettings">
+    <div class="profile-card" id="profileCard">
+      <div class="profile-avatar" id="profileAvatar">E</div>
+      <div class="profile-info">
+        <h3 id="profileName">Eiasash</h3>
+        <p id="profileBio">Style Compass member</p>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">Profile</div>
+      <div class="setting-row">
+        <span class="setting-label">👤 Name</span>
+        <input type="text" class="setting-input" id="profileNameInput" placeholder="Your name" value="Eiasash" oninput="App.saveProfile()" maxlength="30">
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">📝 Bio</span>
+        <input type="text" class="setting-input" id="profileBioInput" placeholder="Short bio" value="Style Compass member" oninput="App.saveProfile()" maxlength="50">
+      </div>
+    </div>
     <div class="settings-group">
       <div class="settings-group-title">Appearance</div>
       <div class="setting-row">
@@ -757,7 +813,9 @@ const Store = {
           darkMode: localStorage.getItem('darkMode'),
           locationEnabled: localStorage.getItem('locationEnabled'),
           autoSave: localStorage.getItem('autoSave'),
-          currentVibe: localStorage.getItem('currentVibe')
+          currentVibe: localStorage.getItem('currentVibe'),
+          profileName: localStorage.getItem('profileName'),
+          profileBio: localStorage.getItem('profileBio')
         }
       };
       store.put(snapshot);
@@ -993,6 +1051,7 @@ const App = {
     this.favorites = this.favorites.filter(f => f && typeof f.name === 'string' && Array.isArray(f.items));
     this.wardrobe = this.wardrobe.filter(w => w && typeof w.name === 'string');
 
+    this.loadProfile();
     this.generateOutfits();
     this.renderHistory();
     this.renderFavorites();
@@ -1002,6 +1061,44 @@ const App = {
     this.setupKeyboard();
     this.setupOfflineDetection();
     this.setupBeforeUnload();
+  },
+
+  // ---- PROFILE ----
+  loadProfile() {
+    const name = localStorage.getItem('profileName') || 'Eiasash';
+    const bio = localStorage.getItem('profileBio') || 'Style Compass member';
+    document.getElementById('profileNameInput').value = name;
+    document.getElementById('profileBioInput').value = bio;
+    this.updateProfileDisplay(name, bio);
+    this.updateWelcome(name);
+  },
+
+  saveProfile() {
+    const name = document.getElementById('profileNameInput').value.trim() || 'User';
+    const bio = document.getElementById('profileBioInput').value.trim() || 'Style Compass member';
+    localStorage.setItem('profileName', name);
+    localStorage.setItem('profileBio', bio);
+    this.updateProfileDisplay(name, bio);
+    this.updateWelcome(name);
+    Store.markDirty();
+  },
+
+  updateProfileDisplay(name, bio) {
+    document.getElementById('profileName').textContent = name;
+    document.getElementById('profileBio').textContent = bio;
+    document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+  },
+
+  updateWelcome(name) {
+    const hour = new Date().getHours();
+    let greeting;
+    if (hour < 12) greeting = 'Good morning';
+    else if (hour < 17) greeting = 'Good afternoon';
+    else greeting = 'Good evening';
+    document.getElementById('welcomeGreeting').textContent = `${greeting}, ${name}!`;
+    const streak = this.getStreak();
+    const sub = streak > 1 ? `${streak}-day streak! Keep it going` : "Let's pick your outfit for today";
+    document.getElementById('welcomeSubtext').textContent = sub;
   },
 
   // ---- SAVE INDICATOR ----
