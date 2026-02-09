@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Style Compass v3.1</title>
+<title>Style Compass v3.2</title>
 <style>
 :root {
   --bg: #f5f5f7;
@@ -449,6 +449,34 @@ body {
 .empty-state h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
 .empty-state p { font-size: 13px; }
 
+/* Sort buttons */
+.sort-bar button:active { background: var(--accent-light) !important; color: var(--accent) !important; }
+
+/* Swipe hint */
+.history-item { position: relative; overflow: hidden; transition: transform 0.2s; }
+
+/* Confirm dialog overlay */
+.confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 250; display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.confirm-box {
+  background: var(--bg-card); border-radius: var(--radius);
+  padding: 24px; max-width: 300px; width: 90%;
+  box-shadow: var(--shadow-lg); text-align: center;
+}
+.confirm-box h3 { font-size: 16px; margin-bottom: 8px; }
+.confirm-box p { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+.confirm-box .btns { display: flex; gap: 8px; }
+.confirm-box .btns button {
+  flex: 1; padding: 10px; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.confirm-box .btn-cancel { background: var(--bg); color: var(--text); }
+.confirm-box .btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+
 /* Streak badge */
 .streak-badge {
   display: inline-flex; align-items: center; gap: 4px;
@@ -495,7 +523,14 @@ body {
     <div class="search-bar">
       <input class="search-input" id="searchInput" type="text" placeholder="Search outfits or tags..." oninput="App.filterOutfits(this.value)" aria-label="Search outfits">
     </div>
-    <div class="section-heading">Recommended Outfits</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="section-heading" style="margin-bottom:0">Recommended Outfits</div>
+      <div style="display:flex;gap:4px">
+        <button onclick="App.sortOutfits('default')" style="padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-size:11px;cursor:pointer" aria-label="Default sort">Shuffle</button>
+        <button onclick="App.sortOutfits('score')" style="padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-size:11px;cursor:pointer" aria-label="Sort by score">Score ↓</button>
+        <button onclick="App.sortOutfits('name')" style="padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-size:11px;cursor:pointer" aria-label="Sort by name">A-Z</button>
+      </div>
+    </div>
     <div class="outfit-grid" id="outfitGrid"></div>
   </div>
 
@@ -585,7 +620,7 @@ body {
     </div>
     <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="App.importData(event)">
     <div style="text-align:center;padding:24px;color:var(--text-secondary);font-size:12px">
-      Style Compass v3.1 &middot; Auto-save enabled
+      Style Compass v3.2 &middot; Auto-save enabled
     </div>
   </div>
 </div>
@@ -619,6 +654,7 @@ body {
       <button class="modal-btn" onclick="App.showComposite()">📸 Outfit Composite</button>
       <button class="modal-btn" onclick="App.showAICritique()">🤖 AI Critique</button>
       <button class="modal-btn" id="modalFavBtn" onclick="App.toggleFavoriteFromModal()">⭐ Add to Favorites</button>
+      <button class="modal-btn" onclick="App.shareOutfit()">📤 Share Outfit</button>
     </div>
     <div id="critiqueContainer"></div>
     <div class="composite-container" id="compositeContainer"></div>
@@ -915,6 +951,9 @@ const App = {
   _toastTimer: null,
   _weatherCache: null,
   _weatherCacheTime: 0,
+  _weatherFetching: false,
+  _critiqueFetching: false,
+  _searchDebounce: null,
 
   // ---- INIT ----
   async init() {
@@ -949,6 +988,11 @@ const App = {
       document.getElementById('autoSaveToggle').classList.remove('active');
     }
 
+    // Data integrity: prune invalid entries
+    this.outfitHistory = this.outfitHistory.filter(e => e && typeof e.name === 'string');
+    this.favorites = this.favorites.filter(f => f && typeof f.name === 'string' && Array.isArray(f.items));
+    this.wardrobe = this.wardrobe.filter(w => w && typeof w.name === 'string');
+
     this.generateOutfits();
     this.renderHistory();
     this.renderFavorites();
@@ -961,11 +1005,13 @@ const App = {
   },
 
   // ---- SAVE INDICATOR ----
+  _saveIndicatorTimer: null,
   showSaveIndicator(state) {
     const el = document.getElementById('saveIndicator');
+    if (this._saveIndicatorTimer) clearTimeout(this._saveIndicatorTimer);
     el.className = 'save-indicator visible ' + (state === 'saving' ? 'saving' : '');
     el.textContent = state === 'saving' ? 'Saving...' : 'Saved ✓';
-    setTimeout(() => el.classList.remove('visible'), 1500);
+    this._saveIndicatorTimer = setTimeout(() => { el.classList.remove('visible'); this._saveIndicatorTimer = null; }, 1500);
   },
 
   // ---- PERSIST HELPERS ----
@@ -1076,8 +1122,12 @@ const App = {
   },
 
   filterOutfits(query) {
-    this.searchQuery = query;
-    this.renderOutfitGrid();
+    if (this._searchDebounce) clearTimeout(this._searchDebounce);
+    this._searchDebounce = setTimeout(() => {
+      this.searchQuery = query;
+      this.renderOutfitGrid();
+      this._searchDebounce = null;
+    }, 150);
   },
 
   applyWeatherAdjustments(outfit) {
@@ -1104,10 +1154,13 @@ const App = {
 
   // ---- WEATHER ----
   async fetchWeather() {
+    if (this._weatherFetching) return;
+    this._weatherFetching = true;
     const icon = document.getElementById('weatherIcon');
     const text = document.getElementById('weatherText');
     // Cache for 5 minutes
     if (this._weatherCache && Date.now() - this._weatherCacheTime < 300000) {
+      this._weatherFetching = false;
       this.weatherData = this._weatherCache;
       icon.textContent = getWeatherEmoji(this.weatherData.code);
       text.innerHTML = `<span class="temp">${this.weatherData.temp}°C</span> ${esc(this.weatherData.city)}`;
@@ -1163,6 +1216,8 @@ const App = {
       else if (err.code === 2) { text.textContent = 'Unavailable'; this.showToast('Location unavailable'); }
       else if (err.code === 3) { text.textContent = 'Timeout'; this.showToast('Location timed out'); }
       else { text.textContent = 'Tap to retry'; this.showToast('Weather failed - tap to retry'); }
+    } finally {
+      this._weatherFetching = false;
     }
   },
 
@@ -1324,6 +1379,9 @@ const App = {
     if (!name) { this.showToast('Enter an item name'); return; }
     if (name.length > 40) { this.showToast('Name too long (max 40 chars)'); return; }
     if (this.wardrobe.length >= 100) { this.showToast('Wardrobe full (max 100 items)'); return; }
+    if (this.wardrobe.some(w => w.name.toLowerCase() === name.toLowerCase() && w.type === typeEl.value)) {
+      this.showToast('Item already exists'); return;
+    }
     this.wardrobe.push({
       id: Date.now().toString(36),
       emoji: TYPE_EMOJIS[typeEl.value] || '👕',
@@ -1392,9 +1450,11 @@ const App = {
 
   // ---- AI CRITIQUE ----
   async showAICritique() {
+    if (this._critiqueFetching) { this.showToast('Already analyzing...'); return; }
     const apiKey = localStorage.getItem('apiKey');
     if (!apiKey || apiKey.trim().length < 5) { this.showToast('Set a valid API key in Settings'); return; }
     if (this.currentOutfitIndex < 0 || this.currentOutfitIndex >= this.currentOutfits.length) return;
+    this._critiqueFetching = true;
     const outfit = this.currentOutfits[this.currentOutfitIndex];
     const container = document.getElementById('critiqueContainer');
     container.innerHTML = '<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span>Analyzing...</span></div>';
@@ -1447,6 +1507,8 @@ Return this exact JSON structure:
       container.innerHTML = `<div class="critique-result" style="border-color:var(--danger)">
         <div class="critique-section"><div class="critique-label">Error</div>
         <div class="critique-value">${esc(msg)}</div></div></div>`;
+    } finally {
+      this._critiqueFetching = false;
     }
   },
 
@@ -1511,7 +1573,7 @@ Return this exact JSON structure:
     ctx.fillText(`${outfit.score}%`, S - 35, S - 35);
     ctx.fillStyle = dk ? '#3a3a3c' : '#d2d2d7';
     ctx.font = '10px -apple-system, sans-serif'; ctx.textAlign = 'left';
-    ctx.fillText('Style Compass v3.1', 12, S - 12);
+    ctx.fillText('Style Compass v3.2', 12, S - 12);
 
     container.innerHTML = '';
     container.appendChild(canvas);
@@ -1665,18 +1727,20 @@ Return this exact JSON structure:
     }
     list.innerHTML = this.outfitHistory.slice(0, 30).map((entry, i) => {
       const date = new Date(entry.date);
-      const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      const isValid = !isNaN(date.getTime());
+      const dateStr = isValid ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '???';
+      const timeStr = isValid ? date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
       const vibeEmoji = { casual:'☀️', formal:'👔', date:'💝', sporty:'🏃', creative:'🎨' }[entry.vibe] || '👔';
       return `
         <div class="history-item">
           <div class="history-item-info">
-            <h4>${vibeEmoji} ${esc(entry.name)}</h4>
-            <p>${(entry.items || []).map(n => esc(n)).join(' · ')}</p>
+            <h4>${vibeEmoji} ${esc(entry.name || 'Unknown')}</h4>
+            <p>${(entry.items || []).map(n => esc(String(n))).join(' · ')}</p>
           </div>
           <div class="history-item-meta">
             <div class="score">${entry.score || 0}%</div>
             <div class="date">${dateStr} ${timeStr}</div>
+            <button class="del-btn" onclick="App.deleteHistoryEntry(${i})" style="background:none;border:none;color:var(--text-secondary);font-size:12px;cursor:pointer;margin-top:2px" aria-label="Delete entry">✕</button>
           </div>
         </div>
       `;
@@ -1706,11 +1770,16 @@ Return this exact JSON structure:
     let streak = 0;
     const today = new Date(); today.setHours(0, 0, 0, 0);
     let checkDate = new Date(today);
+    // Check today first - if no entry today, start from yesterday
+    const todayStr = checkDate.toISOString().split('T')[0];
+    const hasToday = this.outfitHistory.some(e => e.date && e.date.startsWith(todayStr));
+    if (hasToday) { streak = 1; checkDate.setDate(checkDate.getDate() - 1); }
+    else { checkDate.setDate(checkDate.getDate() - 1); }
+    // Count consecutive days backwards
     for (let d = 0; d < 365; d++) {
       const dayStr = checkDate.toISOString().split('T')[0];
       const hasEntry = this.outfitHistory.some(e => e.date && e.date.startsWith(dayStr));
       if (hasEntry) streak++;
-      else if (d > 0) break; // allow today to be missing (day not over)
       else break;
       checkDate.setDate(checkDate.getDate() - 1);
     }
@@ -1742,7 +1811,7 @@ Return this exact JSON structure:
     const home = document.getElementById('tabHome');
     const ind = document.getElementById('pullIndicator');
     let startY = 0, pulling = false, triggered = false;
-    const onStart = (y) => { if (window.scrollY <= 0) { startY = y; pulling = true; triggered = false; } };
+    const onStart = (y) => { if (window.scrollY <= 0 && home.classList.contains('active')) { startY = y; pulling = true; triggered = false; } };
     const onMove = (y) => { if (pulling && y - startY > 60 && !triggered) { ind.classList.add('visible'); triggered = true; } };
     const onEnd = () => {
       if (triggered) {
@@ -1764,8 +1833,11 @@ Return this exact JSON structure:
   // ---- KEYBOARD SHORTCUTS ----
   setupKeyboard() {
     document.addEventListener('keydown', (e) => {
+      // Skip if typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.key === 'Escape') {
         document.getElementById('outfitModal').classList.remove('active');
+        document.querySelectorAll('.confirm-overlay').forEach(el => el.remove());
       }
       // Ctrl/Cmd + S to force save
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -1773,6 +1845,21 @@ Return this exact JSON structure:
         Store.saveNow();
         this.showSaveIndicator('saved');
         this.showToast('Data saved');
+      }
+      // Number keys 1-5 for vibes
+      const vibeKeys = { '1': 'casual', '2': 'formal', '3': 'date', '4': 'sporty', '5': 'creative' };
+      if (vibeKeys[e.key]) {
+        const chip = document.querySelector(`.vibe-chip[data-vibe="${vibeKeys[e.key]}"]`);
+        if (chip) this.selectVibe(vibeKeys[e.key], chip);
+      }
+      // R to refresh outfits
+      if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
+        this.generateOutfits();
+        this.showToast('Outfits refreshed!');
+      }
+      // D to toggle dark mode
+      if (e.key === 'd' && !e.ctrlKey && !e.metaKey) {
+        this.toggleDarkMode();
       }
     });
   },
@@ -1832,12 +1919,26 @@ Return this exact JSON structure:
   },
 
   clearHistory() {
-    if (!confirm('Clear ALL data? This cannot be undone.')) return;
-    this.outfitHistory = []; this.styleDnaHistory = []; this.favorites = []; this.wardrobe = [];
-    localStorage.removeItem('outfitHistory'); localStorage.removeItem('styleDnaHistory');
-    localStorage.removeItem('favorites'); localStorage.removeItem('wardrobe');
-    this.renderHistory(); this.renderFavorites(); this.renderWardrobe(); this.updateStreak();
-    this.showToast('All data cleared');
+    this.showConfirm('Clear All Data?', 'This will delete all history, favorites, and wardrobe items.', () => {
+      this.outfitHistory = []; this.styleDnaHistory = []; this.favorites = []; this.wardrobe = [];
+      localStorage.removeItem('outfitHistory'); localStorage.removeItem('styleDnaHistory');
+      localStorage.removeItem('favorites'); localStorage.removeItem('wardrobe');
+      this.renderHistory(); this.renderFavorites(); this.renderWardrobe(); this.updateStreak();
+      this.showToast('All data cleared');
+    });
+  },
+
+  showConfirm(title, message, onConfirm) {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    overlay.innerHTML = `<div class="confirm-box">
+      <h3>${esc(title)}</h3><p>${esc(message)}</p>
+      <div class="btns"><button class="btn-cancel">Cancel</button><button class="btn-danger">Delete</button></div>
+    </div>`;
+    overlay.querySelector('.btn-cancel').onclick = () => overlay.remove();
+    overlay.querySelector('.btn-danger').onclick = () => { overlay.remove(); onConfirm(); };
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
   },
 
   exportData() {
@@ -1853,7 +1954,8 @@ Return this exact JSON structure:
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = `style-compass-${new Date().toISOString().split('T')[0]}.json`;
-    a.click(); URL.revokeObjectURL(url);
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
     this.showToast('Data exported!');
   },
 
@@ -1867,16 +1969,21 @@ Return this exact JSON structure:
         if (!data || typeof data !== 'object') throw new Error('Invalid file');
         let imported = 0;
         if (Array.isArray(data.outfitHistory)) {
-          this.outfitHistory = data.outfitHistory; this.persistHistory(); imported++;
+          // Validate entries have required fields
+          const valid = data.outfitHistory.filter(e => e && typeof e.name === 'string' && typeof e.date === 'string');
+          this.outfitHistory = valid; this.persistHistory(); imported++;
         }
         if (Array.isArray(data.styleDnaHistory)) {
-          this.styleDnaHistory = data.styleDnaHistory; this.persistDna(); imported++;
+          const valid = data.styleDnaHistory.filter(e => e && e.date && e.scores);
+          this.styleDnaHistory = valid; this.persistDna(); imported++;
         }
         if (Array.isArray(data.favorites)) {
-          this.favorites = data.favorites; this.persistFavorites(); imported++;
+          const valid = data.favorites.filter(f => f && typeof f.name === 'string' && Array.isArray(f.items));
+          this.favorites = valid; this.persistFavorites(); imported++;
         }
         if (Array.isArray(data.wardrobe)) {
-          this.wardrobe = data.wardrobe; this.persistWardrobe(); imported++;
+          const valid = data.wardrobe.filter(w => w && typeof w.name === 'string' && typeof w.type === 'string');
+          this.wardrobe = valid; this.persistWardrobe(); imported++;
         }
         this.renderHistory(); this.renderFavorites(); this.renderWardrobe(); this.updateStreak();
         this.showToast(`Imported ${imported} data sets!`);
@@ -1886,6 +1993,50 @@ Return this exact JSON structure:
     };
     reader.readAsText(file);
     event.target.value = '';
+  },
+
+  // ---- DELETE HISTORY ENTRY ----
+  deleteHistoryEntry(idx) {
+    if (idx < 0 || idx >= this.outfitHistory.length) return;
+    const name = this.outfitHistory[idx].name;
+    this.outfitHistory.splice(idx, 1);
+    this.persistHistory();
+    this.renderHistory();
+    this.updateStreak();
+    this.showToast(`Removed "${name}" from history`);
+  },
+
+  // ---- SORT OUTFITS ----
+  _sortMode: 'default',
+  sortOutfits(mode) {
+    this._sortMode = mode;
+    if (mode === 'score') {
+      this.currentOutfits.sort((a, b) => b.score - a.score);
+    } else if (mode === 'name') {
+      this.currentOutfits.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (mode === 'items') {
+      this.currentOutfits.sort((a, b) => b.items.length - a.items.length);
+    }
+    // 'default' = keep shuffled order
+    this.renderOutfitGrid();
+  },
+
+  // ---- SHARE OUTFIT ----
+  async shareOutfit() {
+    if (this.currentOutfitIndex < 0 || this.currentOutfitIndex >= this.currentOutfits.length) return;
+    const outfit = this.currentOutfits[this.currentOutfitIndex];
+    const text = `${outfit.name} (${this.currentVibe} vibe, ${outfit.score}%)\n${outfit.items.map(i => `• ${i.name} (${i.type})`).join('\n')}\n\nvia Style Compass`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: outfit.name, text });
+        this.showToast('Shared!');
+      } catch (e) { if (e.name !== 'AbortError') this.showToast('Share cancelled'); }
+    } else {
+      try {
+        await navigator.clipboard.writeText(text);
+        this.showToast('Copied to clipboard!');
+      } catch (e) { this.showToast('Could not share'); }
+    }
   },
 
   // ---- TOAST ----
